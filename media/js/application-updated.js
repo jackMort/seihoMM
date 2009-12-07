@@ -282,7 +282,9 @@ Seiho.mm.application.App = function() {//{{{
 					// ...
 					title   : 'Nowa Mapa ...',
 					iconCls : 'icon-page_white',
-					closable: true
+					closable: true,
+					// plugins ...
+					plugins : [ new Seiho.mm.plugins.Director() ]
 				}
 			);
 			tabPanel.add( t );

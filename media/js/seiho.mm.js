@@ -12,6 +12,7 @@ Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
 	// mart that is canvas
 	yeahItIsCanvas: Ext.emptyFn,
 	initComponent : function() {
+		// ..
 		Ext.apply( this, {
 			keys: 
 			[
@@ -193,8 +194,8 @@ Seiho.mm.element.BaseElement = Ext.extend( Ext.util.Observable, {//{{{
         	this.addEvents(
             		'add',
       		      	'remove',
-			'move',
-			'resize'
+					'move',
+					'resize'
         	);
 
 		Ext.apply( this, config || {} );
