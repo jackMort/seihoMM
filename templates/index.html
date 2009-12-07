@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="p">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="Author" content="Lech Twaróg - lech.twarog@gmail.com" />
+		
+		<link rel="stylesheet" type="text/css" href="/media/js/ext/resources/css/ext-all.css" />
+		<link rel="stylesheet" type="text/css" href="/media/css/base.css" />
+		<link rel="stylesheet" type="text/css" href="/media/css/icons.css" />
+		<link rel="stylesheet" type="text/css" href="/media/css/docs.css" />
+	
+		<script type="text/javascript" src="/media/js/ext/adapter/ext/ext-base.js"></script>
+		<script type="text/javascript" src="/media/js/ext/ext-all.js"></script>
+		
+		<script type="text/javascript" src="/media/js/raphael.js"></script>
+		<script type="text/javascript" src="/media/js/graffle.js"></script>
+	
+		<!--script type="text/javascript" src="/media/js/application.js"></script-->
+		<script type="text/javascript" src="/media/js/seiho.mm.js"></script>
+		<script type="text/javascript" src="/media/js/application-updated.js"></script>
+		<link rel="shortcut icon" href="/media/images/icons/asterisk_orange.png"/>
+		{% if user.is_staff %}
+		{% endif %}
+		{% block head_extra %}{% endblock %}
+		<title>{% block title %}seihoMindMapper{% endblock %}</title>
+
+	</head>
+	<body></body>
+</html>
