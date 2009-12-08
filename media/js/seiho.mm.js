@@ -248,10 +248,15 @@ Seiho.mm.element.Line   = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 	connectTo: function( f, t ) {//{{{
 		var r  = this.canvas.raphael;
 		var rr = r.connection( f.raphael_rect, t.raphael_rect, "#99bbe8", "#99bbe8|2" ) 
+		// register connection
+		var fac = f.connections || new Ext.util.MixedCollection();
+		fac.add( t );
+		f.connections = fac;
+		// ..
 		var el = Ext.get( rr.bg.node );
 
 		var contextMenu = function( e ) {
-			console.log( e.getXY() );
+			Seiho.Logger.log( e.getXY() );
 		}
 		var update = function( w, x, y) {
 			r.connection( rr );
@@ -259,6 +264,8 @@ Seiho.mm.element.Line   = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 		var destroy = function() {
 			rr.line.remove();
 			rr.bg.remove();
+			// unregister connections
+			f.connections.remove( t );
 		}
 		// ..
 		el.on( 'contextmenu', contextMenu )		
@@ -396,10 +403,10 @@ Seiho.mm.element.Window = Ext.extend( Ext.Window, {//{{{
 	},
 	//}}}
 	uninstall: function() {//{{{
-		this.close();
-		// ..
 		this.canvas.unregisterElement( this );
 		this.fireEvent( 'remove', this, this.canvas );
+		// ..
+		this.close();
 	},
 	//}}}
 	startTitleEdit: function() {//{{{

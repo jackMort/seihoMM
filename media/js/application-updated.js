@@ -301,7 +301,8 @@ Seiho.mm.application.App = function() {//{{{
 			if( t.yeahItIsCanvas ) {
 				var r = t.serialize();
 				// TODO serializers
-				console.log( r );				
+				Seiho.Logger.log( r );
+				alert( 'now' )
 			}
 		},
 		aboutUs: function() {
