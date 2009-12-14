@@ -246,7 +246,7 @@ Seiho.mm.application.App = function() {//{{{
 							},
 							'->',
 							' ',
-							'<div id="seiho-text"><img src="/media/images/logo.png"/><!--span class="highlight">seiho</span>MindMapper <span class="beta">DEVELOPMENT PREVIEW</span--></div>'
+							'<div id="seiho-text"><img src="/media/images/logo.png"/></div>'
 						]
 					}  
 				]
@@ -313,9 +313,10 @@ Seiho.mm.application.App = function() {//{{{
 			}
 				
 			this.aboutUsWindow = new Ext.Window({
-				width     : 500,
-				height    : 300,
-				autoLoad  : '/welcome.html',
+				width     : 480,
+				height    : 400,
+				autoLoad  : '/aboutUs.html',
+				bodyStyle : 'padding:10px;background:white;',
 				autoScroll: true,
 				title     : 'O nas',
 				iconCls   : 'icon-star',
@@ -326,7 +327,17 @@ Seiho.mm.application.App = function() {//{{{
 						},
 						scope: this
 					}
-				}
+				},
+				buttons   : [
+					{
+						text   : 'Zamknij',
+						iconCls: 'icon-cross',
+						scope  : this,
+						handler: function() {
+							this.aboutUsWindow.close();
+						}
+					}
+				]
 			});
 
 			this.aboutUsWindow.show();
