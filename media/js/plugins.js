@@ -5,7 +5,8 @@ Seiho.mm.plugins.Director = function( config ) {
 };
 
 Ext.extend( Seiho.mm.plugins.Director, Ext.util.Observable, {
-
+	widtbPrefix : 50,
+	heightPrefix: 10,
 	init: function( canvas ) {
 		this.canvas = canvas;
 
@@ -25,24 +26,35 @@ Ext.extend( Seiho.mm.plugins.Director, Ext.util.Observable, {
 		this.setPosition( this.canvas.registry.get( 0 ) );
 	},
 	setPosition: function( el ) {
-		var xy = el.getPosition( true ), x = xy[0], y = xy[1], w = el.getWidth(), h = el.getHeight(), conn = el.connections;
+		var xy = el.getPosition( true ), x = xy[0], y = xy[1], w = el.getWidth(), h = el.getHeight(), conn = el.connections, cminw = el.cminw || 0, cminh = el.cminh || 0;
 		// ..
 		if( conn ) {
 			var th = 0, mw = 0;
 			conn.each( function( it ) {
 				if( it.getWidth() > mw ) mw = it.getWidth();
 				th += it.getHeight();
-			});
-			
-			var m  = Math.ceil( th / 2 );
-			var n  = Math.ceil( h / 2 );
-			var sy = m > y + n ? 10 : y + n - m; 
-			
-			conn.each( function( it ) {
-				it.setPosition( x + w + 50 + Math.ceil( mw / 2 ) - Math.ceil( it.getWidth() / 2 ), sy );
-				this.setPosition( it );
-				sy += it.getHeight() + 10;
 			}, this );
+			
+			var m   = Math.ceil( th / 2 );
+			var n   = Math.ceil( h / 2 );
+			var sy  = m > y + n ? 10 : y + n - m; 
+			var add = 0;
+
+			conn.each( function( it ) {
+				this.setPosition( it );
+				var xxx = 0;
+				if( it.cminh ) {
+					add += it.cminh;					
+					//xxx = Math.ceil( it.cminh/ 2 ) - Math.ceil( it.getHeight() / 2 ) ;
+					//sy += xxx;
+				}
+				// ..
+				it.setPosition( x + w + this.widtbPrefix + Math.ceil( mw / 2 ) - Math.ceil( it.getWidth() / 2 ), sy );								
+				sy += it.getHeight() + xxx;
+			}, this );
+
+			el.cminh = add + ( th > h ? th : 0 );
+			el.setTitle( el.cminh );
 		}
 	}
 });
