@@ -18,12 +18,10 @@ Seiho.mm.application.ToolsProvider = Ext.extend( Ext.Toolbar, {//{{{
 				},
 				'->',{
 					iconCls: 'icon-application_get',
-					text   : 'Instaluj okno',
 					handler: this.installWindow,
 					scope  : this
 				}, ' ', {
 					iconCls: 'icon-application_lightning',
-					text   : 'Instaluj linię',
 					handler: this.installLine,
 					scope  : this
 				},'-', {
@@ -139,26 +137,9 @@ Seiho.mm.application.HomePanel = Ext.extend( Ext.Panel, {//{{{
 });
 //}}}
 Seiho.mm.application.App = function() {//{{{
-	/*
-	var loginAction = new Ext.Action({
-		iconCls: 'icon-user_go',
-		text   : 'Logowanie'
-	});
-	var registerAction = new Ext.Action({
-		iconCls: 'icon-user_add',
-		text   : 'Rejestracja'
-	});
-	*/
 	var toolsProvider = new Seiho.mm.application.ToolsProvider(); 	
 	var tabPanel      = new Seiho.mm.application.TabPanel({
 		tbar: toolsProvider
-		/*,bbar: [
-			'->',
-			loginAction,
-			'-',
-			registerAction,
-			' '
-		]*/
 	});
 	var keyMap        = new Ext.KeyMap( document, [
 		// intall element on CTRL+ENTER
@@ -211,7 +192,11 @@ Seiho.mm.application.App = function() {//{{{
 														handler: Seiho.mm.application.App.save 
 													},
 													'-',
-													{ text: 'Zamknij', iconCls: 'icon-cross' }
+													{ 
+														text   : 'Zamknij',
+														iconCls: 'icon-cross',  
+														handler: Seiho.mm.application.App.close
+													}
 												]
 										},{
 											text     : 'Edycja',
@@ -302,8 +287,14 @@ Seiho.mm.application.App = function() {//{{{
 				var r = t.serialize();
 				// TODO serializers
 				Seiho.Logger.log( r );
-				alert( 'now' )
 			}
+		},
+		close  : function() {
+			var t = tabPanel.getActiveTab();
+			// TODO create isCanvas
+			if( t.yeahItIsCanvas ) {
+				tabPanel.remove( t )
+			}	
 		},
 		aboutUs: function() {
 			if( this.aboutUsWindow ) {
