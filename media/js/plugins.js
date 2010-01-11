@@ -77,4 +77,65 @@ Ext.extend( Seiho.mm.plugins.Director, Ext.util.Observable, {
 	}
 });
 
+/**
+ * Plugin to connect canvas with comet server
+ */
+
+var CommetActions = {
+	NAME_CHANGED: 0,
+	CLOSED      : 1,
+	OPENED      : 2,
+	// ..
+	EL_ADDED    : 3,
+	EL_REMOVED  : 4,
+	EL_RESIZED  : 5,
+	EL_MODIFIED : 6
+};
+
+Seiho.mm.plugins.Comet = function( config ) {
+	Ext.apply( this, config );
+};
+Ext.extend( Seiho.mm.plugins.Comet, Ext.util.Observable, {
+	cometServer: 'http://localhost:8800/cometd/',		
+	init: function( canvas ) {				
+		this.canvasChannel = '/canvas/' + canvas.name;
+
+		dojox.comet.init( this.cometServer );
+		dojox.comet.subscribe( this.canvasChannel, this.onCanvasAction.createDelegate( this ) );
+		
+		this.canvas = canvas;
+		Ext.apply( canvas, {
+			registerElement  : canvas.registerElement.createSequence( this.registerElement, this ),
+			unregisterElement: canvas.unregisterElement.createSequence( this.unregisterElement, this )
+		});
+	},
+	registerElement: function( el ) {
+		dojox.comet.publish( this.canvasChannel, { type: CometActions.EL_ADDED, el: el } );
+		// ..
+		el.on( 'resize', this.onElResize, this );
+	},
+	unregisterElement: function( el ) {
+		dojox.comet.publish( this.canvasChannel, { type: CometActions.EL_REMOVED, el: el } );
+	},
+	onCanvasAction: function( m ) {
+		switch( m.type ) {
+			case CometActions.EL_ADDED  : this.addElement( el );  break;
+			case CometActions.EL_REMOVED: this.removeElement( el );  break;
+		
+			default: Logger.log( m.type )
+		}
+	},
+	// private
+	onElResize: function() {
+		dojox.comet.publish( this.canvasChannel, 'TODO :/' );
+	},
+	addElement: function( el ) {
+		Logger.log( "addElement: " + el );
+	},
+	removeElement: function( el ) {
+		Logger.log( "removeElement: " + el );
+	}
+});
+
+
 // vim: fdm=marker ts=4 sw=4 sts=4
