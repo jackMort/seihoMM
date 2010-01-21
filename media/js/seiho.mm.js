@@ -139,7 +139,18 @@ Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
 	},
 	getToolsProvider: function() {
 		return this.toolsProvider;
-	}
+	},
+    installPlugin: function( plugin ) {
+        var owner = this.ownerCt, plugins = this.plugins || [];
+        // ..
+        plugins.push( plugin );
+        plugin.init( this );
+    },
+    removePlugin: function( plugin ) {
+        var owner = this.ownerCt, plugins = this.plugins || [];
+        // ..
+        plugins.remove( plugin );
+    }
 });
 //}}}
 Seiho.mm.Registry = Ext.extend( Ext.util.MixedCollection, {//{{{

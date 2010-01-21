@@ -228,6 +228,23 @@ Seiho.mm.application.App = function() {//{{{
 													{ text: 'Kopiuj', iconCls: 'icon-page_white_copy' },
 													{ text: 'Wklej' , iconCls: 'icon-page_white_paste' },
 													'-',
+                                                    { 
+                                                        text: 'Pluginy',
+                                                        // TODO: add register plugin
+                                                        menu: 
+                                                            [
+                                                                { 
+                                                                    text: 'Director',
+                                                                    handler: function() {
+                                                                        var t = tabPanel.getActiveTab();
+                                                                        // TODO create isCanvas
+                                                                        if( t.yeahItIsCanvas ) {
+                                                                            t.installPlugin( new Seiho.mm.plugins.Director() )
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                    },
 													{ text: 'Ustawienia', iconCls: 'icon-page_white_gear' }
 												]
 										},{
@@ -287,7 +304,7 @@ Seiho.mm.application.App = function() {//{{{
 					iconCls : 'icon-page_white',
 					closable: true,
 					// plugins ...
-					plugins : [ new Seiho.mm.plugins.Director() ]
+					// plugins : [  ]
 				}
 			);
 			tabPanel.add( t );
