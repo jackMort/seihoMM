@@ -16,7 +16,7 @@ MANAGERS = ADMINS
 DATABASE_ENGINE = 'mysql'      # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATABASE_NAME = 'seiho'        # Or path to database file if using sqlite3.
 DATABASE_USER = 'root'         # Not used with sqlite3.
-DATABASE_PASSWORD = ''     # Not used with sqlite3.
+DATABASE_PASSWORD = 'toor'     # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
@@ -76,10 +76,17 @@ TEMPLATE_DIRS = (
     os.path.join( HOME_DIR, 'templates' )
 )
 
+SERIALIZATION_MODULES = {
+    'extdirect': 'extdirect.django.serializer'        
+}
+
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites'
+    'django.contrib.sites',
+    'reversion',
+    'seihoMM.map'
+
 )
