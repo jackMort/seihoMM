@@ -7,5 +7,4 @@ seihoMM is a mind mapper writen in [extjs](http://extjs.com), [raphaeljs](http:/
 Installation and first run
 --------------------------
 
-``python manage.py syncdb``
-``python manage.py runserver``
+execute ``python manage.py syncdb`` to synchronize database, run server ``python manage.py runserver`` and navigate to [http://localhost:8000](http://localhost:8000)
