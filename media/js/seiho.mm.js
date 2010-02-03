@@ -105,7 +105,28 @@ Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
 		
 		// create Raphael svg object
 		this.raphael = Raphael( this.body.id, this.maxWidth, this.maxHeight);
+
+        new Ext.Slider({
+            renderTo: Ext.DomHelper.append( this.getEl(), { tag: 'div', cls: 'canvas-slider' } ),
+            height: 200,
+            value: 5,
+            minValue: 1,
+            maxValue: 10,
+            vertical: true,
+            listeners: {
+                change: this.zoomCanvas.createDelegate( this )
+            }
+        })
 	},
+    zoomCanvas: function( s, w ) {
+        var el = Ext.get( this.raphael.canvas ), m = -this.maxHeight, u = this.maxHeight * 2 /10
+        var v = this.maxHeight
+        if( w != 5 )
+            v = u * w
+            
+        var cx = 0, cy = 0, cw = v, ch = v;
+        el.set( { viewBox: cx + " " + cy + " " + cw + " " + " " + ch } )
+    },
 	moveElementTo: function() {
 	
 	},
@@ -150,6 +171,9 @@ Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
         var owner = this.ownerCt, plugins = this.plugins || [];
         // ..
         plugins.remove( plugin );
+    },
+    getSvgInnerHTML: function() {
+        return Ext.get( this.raphael.canvas ).parent().dom.innerHTML                 
     }
 });
 //}}}
@@ -418,7 +442,8 @@ Seiho.mm.element.Window = Ext.extend( Ext.Window, {//{{{
 		Seiho.mm.element.Window.superclass.afterRender.call( this );
 		// create svg rect
 		var /*xy = FAIL at start -> element.getPosition(),*/ w = this.getWidth(), h = this.getHeight(), x = this.x, y = this.y;
-		this.raphael_rect = this.canvas.raphael.rect( x, y, w, h ).attr({ stroke: "" });
+        var c = Raphael.getColor();
+		this.raphael_rect = this.canvas.raphael.rect( x, y, w, h, 5 ).attr({ stroke: c, fill: c, "fill-opacity": .4 });
 		// ..
 		this.header.on( 'dblclick', this.startTitleEdit, this );
 	},
