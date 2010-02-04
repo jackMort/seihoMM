@@ -278,6 +278,55 @@ Seiho.mm.element.BaseElement = Ext.extend( Ext.util.Observable, {//{{{
 	//}}}
 });
 //}}}
+
+Raphael.fn.window = function( w, h, x, y, title ) {
+    return this.set(
+        this.rect( x, y, w, h, 5 ).attr({ stroke: '#99bbe8', fill: '#99bbe8', "fill-opacity": .9 }),
+        this.rect( x + 5, y + 15, w - 10, h - 20, 3 ).attr({ stroke: '#99bbe8', fill: 'white', "fill-opacity": 1 }),
+        this.text( x + 40, y + 5, title ).attr( { font: '10px Courier, Courier New, Arial', fill: '#ffffff' })
+    )
+}
+
+Seiho.mm.element.Window = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
+	width        : 200,
+	height       : 100,
+	x            : 100,
+	y            : 100,
+	iconCls      : 'icon-page_white',
+	title        : 'Bez tytułu',
+	// .....
+	install: function() {//{{{
+        Seiho.mm.element.Window.superclass.install.apply( this, arguments )
+		// ..	
+        var w = this.width, h = this.height, x = this.x, y = this.y;
+		var r = this.raphael = this.canvas.raphael.window( w, h, x, y, this.title );
+
+        setTimeout( function() {
+            alert( 'now' );
+            r.attr( { width: 200, height: 200 } );
+        }, 5000 )
+	},
+	//}}}
+	uninstall: function() {//{{{
+        Seiho.mm.element.Window.superclass.uninstall.apply( this, arguments )
+		// ..
+        this.raphael.remove()
+	}
+});
+//}}}
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 Seiho.mm.element.Line   = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 	// first point
 	x1     : 10,
@@ -298,9 +347,6 @@ Seiho.mm.element.Line   = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 		return this
 	},
 	//}}}
-	/**
-	 * Make connection from window1 to window2
-	 */
 	connectTo: function( f, t ) {//{{{
 		var r  = this.canvas.raphael;
 		var rr = r.connection( f.raphael_rect, t.raphael_rect, "#99bbe8", "#99bbe8|2" ) 
@@ -444,7 +490,7 @@ Seiho.mm.element.Window = Ext.extend( Ext.Window, {//{{{
 	afterRender   : function() {//{{{
 		Seiho.mm.element.Window.superclass.afterRender.call( this );
 		// create svg rect
-		var /*xy = FAIL at start -> element.getPosition(),*/ w = this.getWidth(), h = this.getHeight(), x = this.x, y = this.y;
+		var w = this.getWidth(), h = this.getHeight(), x = this.x, y = this.y;
 		var c = Raphael.getColor();
 		this.raphael_rect = this.canvas.raphael.rect( x, y, w, h, 5 ).attr({ stroke: '#99bbe8', fill: '#99bbe8', "fill-opacity": .9 });
 		// ..
@@ -550,4 +596,5 @@ Ext.extend( Seiho.mm.element.Window.DD, Ext.dd.DD, {
 	}
 });
 //}}}
+*/
 // vim: fdm=marker ts=4 st=4 sts=4
