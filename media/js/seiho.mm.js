@@ -102,35 +102,38 @@ Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
 				return this.cb.call( this.scope, src, e, data );
 			}
 		});
-		
+
 		// create Raphael svg object
 		this.raphael = Raphael( this.body.id, this.maxWidth, this.maxHeight);
+		// create slider
+		new Ext.Slider({
+			renderTo: Ext.DomHelper.append( this.getEl(), { tag: 'div', cls: 'canvas-slider' } ),
+			height: 200,
+			value: 5,
+			minValue: 0,
+			maxValue: 10,
+			vertical: true,
+			listeners: {
+				change: this.zoomCanvas.createDelegate( this )
+			}
+		})
+	},
+	zoomCanvas: function( s, w ) {		
+		var el = Ext.get( this.raphael.canvas ), steps = 10, m = -this.maxHeight, u = this.maxHeight * 2 /steps
+		var v = this.maxHeight;
+		switch( w ) {
+			case 0: v = this.maxHeight/steps; break
+			case steps/2: v = this.maxHeight; break
+			default: v = u * w
+		}
 
-        new Ext.Slider({
-            renderTo: Ext.DomHelper.append( this.getEl(), { tag: 'div', cls: 'canvas-slider' } ),
-            height: 200,
-            value: 5,
-            minValue: 1,
-            maxValue: 10,
-            vertical: true,
-            listeners: {
-                change: this.zoomCanvas.createDelegate( this )
-            }
-        })
+		var cx = 0, cy = 0, cw = v, ch = v;
+		el.set( { viewBox: cx + " " + cy + " " + cw + " " + " " + ch } )
 	},
-    zoomCanvas: function( s, w ) {
-        var el = Ext.get( this.raphael.canvas ), m = -this.maxHeight, u = this.maxHeight * 2 /10
-        var v = this.maxHeight
-        if( w != 5 )
-            v = u * w
-            
-        var cx = 0, cy = 0, cw = v, ch = v;
-        el.set( { viewBox: cx + " " + cy + " " + cw + " " + " " + ch } )
-    },
 	moveElementTo: function() {
-	
+
 	},
-	
+
 	registerElement: function( el ) {
 		return this.registry.register( el );
 	},
@@ -138,7 +141,7 @@ Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
 	unregisterElement: function( el ) {
 		return this.registry.unregister( el );
 	},
-	
+
 	serialize: function() {
 		var r = {
 			name       : this.title,
@@ -161,20 +164,20 @@ Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
 	getToolsProvider: function() {
 		return this.toolsProvider;
 	},
-    installPlugin: function( plugin ) {
-        var owner = this.ownerCt, plugins = this.plugins || [];
-        // ..
-        plugins.push( plugin );
-        plugin.init( this );
-    },
-    removePlugin: function( plugin ) {
-        var owner = this.ownerCt, plugins = this.plugins || [];
-        // ..
-        plugins.remove( plugin );
-    },
-    getSvgInnerHTML: function() {
-        return Ext.get( this.raphael.canvas ).parent().dom.innerHTML                 
-    }
+	installPlugin: function( plugin ) {
+		var owner = this.ownerCt, plugins = this.plugins || [];
+		// ..
+		plugins.push( plugin );
+		plugin.init( this );
+	},
+	removePlugin: function( plugin ) {
+		var owner = this.ownerCt, plugins = this.plugins || [];
+		// ..
+		plugins.remove( plugin );
+	},
+	getSvgInnerHTML: function() {
+		return Ext.get( this.raphael.canvas ).parent().dom.innerHTML                 
+	}
 });
 //}}}
 Seiho.mm.Registry = Ext.extend( Ext.util.MixedCollection, {//{{{
@@ -243,16 +246,16 @@ Seiho.mm.Editor = Ext.extend( Ext.util.Observable, {//{{{
 // PROTOTYPES
 Seiho.mm.element.BaseElement = Ext.extend( Ext.util.Observable, {//{{{
 	constructor: function( canvas, config ){//{{{
-        	this.canvas = canvas;
-        	this.addEvents(
-            		'add',
-      		      	'remove',
-					'move',
-					'resize'
-        	);
+		this.canvas = canvas;
+		this.addEvents(
+			'add',
+			'remove',
+			'move',
+			'resize'
+		);
 
 		Ext.apply( this, config || {} );
-        	Seiho.mm.element.BaseElement.superclass.constructor.call( config )
+		Seiho.mm.element.BaseElement.superclass.constructor.call( config )
 	},
 	//}}}
 	install: function() {//{{{
@@ -332,63 +335,63 @@ Seiho.mm.element.Line   = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 
 	initLine : function(x, y, ax, ay, bx, by, zx, zy) {
 		var r = this.canvas.raphael;
-                    var path = [["M", x, y], ["C", ax, ay, bx, by, zx, zy]],
-                        path2 = [["M", x, y], ["L", ax, ay], ["M", bx, by], ["L", zx, zy]],
-                        curve = r.path(path).attr({stroke: Raphael.getColor(), "stroke-width": 2}),
-                        controls = r.set(
-                            r.path(path2).attr({stroke: "#999", "stroke-opacity": .3}),
-                            r.circle(x, y, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6}),
-                            r.circle(ax, ay, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6}),
-                            r.circle(bx, by, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6}),
-                            r.circle(zx, zy, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6})
-                        );
-                    controls[1].update = function (x, y) {
-                        var X = this.attr("cx") + x,
-                            Y = this.attr("cy") + y;
-                        this.attr({cx: X, cy: Y});
-                        path[0][1] = X;
-                        path[0][2] = Y;
-                        path2[0][1] = X;
-                        path2[0][2] = Y;
-                        controls[2].update(x, y);
-                    };
-                    controls[2].update = function (x, y) {
-                        var X = this.attr("cx") + x,
-                            Y = this.attr("cy") + y;
-                        this.attr({cx: X, cy: Y});
-                        path[1][1] = X;
-                        path[1][2] = Y;
-                        path2[1][1] = X;
-                        path2[1][2] = Y;
-                        curve.attr({path: path});
-                        controls[0].attr({path: path2});
-                    };
-                    controls[3].update = function (x, y) {
-                        var X = this.attr("cx") + x,
-                            Y = this.attr("cy") + y;
-                        this.attr({cx: X, cy: Y});
-                        path[1][3] = X;
-                        path[1][4] = Y;
-                        path2[2][1] = X;
-                        path2[2][2] = Y;
-                        curve.attr({path: path});
-                        controls[0].attr({path: path2});
-                    };
-                    controls[4].update = function (x, y) {
-                        var X = this.attr("cx") + x,
-                            Y = this.attr("cy") + y;
-                        this.attr({cx: X, cy: Y});
-                        path[1][5] = X;
-                        path[1][6] = Y;
-                        path2[3][1] = X;
-                        path2[3][2] = Y;
-                        controls[3].update(x, y);
-                    };
-                    controls.mousedown(function (e) {
-  //                      drag = this;
-//                        E.x = e.clientX;
-    //                    E.y = e.clientY;
-                    });
+		var path = [["M", x, y], ["C", ax, ay, bx, by, zx, zy]],
+		path2 = [["M", x, y], ["L", ax, ay], ["M", bx, by], ["L", zx, zy]],
+		curve = r.path(path).attr({stroke: Raphael.getColor(), "stroke-width": 2}),
+		controls = r.set(
+			r.path(path2).attr({stroke: "#999", "stroke-opacity": .3}),
+			r.circle(x, y, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6}),
+			r.circle(ax, ay, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6}),
+			r.circle(bx, by, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6}),
+			r.circle(zx, zy, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6})
+		);
+		controls[1].update = function (x, y) {
+			var X = this.attr("cx") + x,
+				Y = this.attr("cy") + y;
+			this.attr({cx: X, cy: Y});
+			path[0][1] = X;
+			path[0][2] = Y;
+			path2[0][1] = X;
+			path2[0][2] = Y;
+			controls[2].update(x, y);
+		};
+		controls[2].update = function (x, y) {
+			var X = this.attr("cx") + x,
+				Y = this.attr("cy") + y;
+			this.attr({cx: X, cy: Y});
+			path[1][1] = X;
+			path[1][2] = Y;
+			path2[1][1] = X;
+			path2[1][2] = Y;
+			curve.attr({path: path});
+			controls[0].attr({path: path2});
+		};
+		controls[3].update = function (x, y) {
+			var X = this.attr("cx") + x,
+				Y = this.attr("cy") + y;
+			this.attr({cx: X, cy: Y});
+			path[1][3] = X;
+			path[1][4] = Y;
+			path2[2][1] = X;
+			path2[2][2] = Y;
+			curve.attr({path: path});
+			controls[0].attr({path: path2});
+		};
+		controls[4].update = function (x, y) {
+			var X = this.attr("cx") + x,
+				Y = this.attr("cy") + y;
+			this.attr({cx: X, cy: Y});
+			path[1][5] = X;
+			path[1][6] = Y;
+			path2[3][1] = X;
+			path2[3][2] = Y;
+			controls[3].update(x, y);
+		};
+		controls.mousedown(function (e) {
+		//                      drag = this;
+		//                        E.x = e.clientX;
+		//                    E.y = e.clientY;
+		});
 	}
 	//}}} 
 })
@@ -402,11 +405,11 @@ Seiho.mm.element.Window = Ext.extend( Ext.Window, {//{{{
 	title        : 'Bez tytułu',
 	// FIXME CHANGE TO MULTI EXTENDS
 	constructor: function( canvas, config ){//{{{
-        	this.canvas   = canvas;
+		this.canvas   = canvas;
 		this.renderTo = this.canvas.body;
 		Ext.apply( this, config || {} );
 		// ..
-        	Seiho.mm.element.Window.superclass.constructor.call( this )
+		Seiho.mm.element.Window.superclass.constructor.call( this )
 	},
 	//}}}
 	serialize: function() {//{{{
@@ -432,7 +435,7 @@ Seiho.mm.element.Window = Ext.extend( Ext.Window, {//{{{
 			]
 		});
 		Seiho.mm.element.Window.superclass.initComponent.apply( this, arguments );
-		
+
 		this.on( 'resize', this._onResize, this );
 		this.on( 'move'  , this._onMove  , this );
 		this.on( 'drag'  , this._onDrag  , this );
@@ -442,8 +445,8 @@ Seiho.mm.element.Window = Ext.extend( Ext.Window, {//{{{
 		Seiho.mm.element.Window.superclass.afterRender.call( this );
 		// create svg rect
 		var /*xy = FAIL at start -> element.getPosition(),*/ w = this.getWidth(), h = this.getHeight(), x = this.x, y = this.y;
-        var c = Raphael.getColor();
-		this.raphael_rect = this.canvas.raphael.rect( x, y, w, h, 5 ).attr({ stroke: c, fill: c, "fill-opacity": .4 });
+		var c = Raphael.getColor();
+		this.raphael_rect = this.canvas.raphael.rect( x, y, w, h, 5 ).attr({ stroke: '#99bbe8', fill: '#99bbe8', "fill-opacity": .9 });
 		// ..
 		this.header.on( 'dblclick', this.startTitleEdit, this );
 	},
@@ -478,12 +481,12 @@ Seiho.mm.element.Window = Ext.extend( Ext.Window, {//{{{
 		// FUUUUUUUUUUUU!
 		var that = this
 		this.dd = new Seiho.mm.element.Window.DD( this, {
- 			onDrag : function( e ) {
-        			this.alignElWithMouse(this.proxy, e.getPageX(), e.getPageY());
+			onDrag : function( e ) {
+				this.alignElWithMouse(this.proxy, e.getPageX(), e.getPageY());
 				that._onElDrag( e )
-    			}
+			}
 		});
-    	},
+	},
 	//}}}
 	// private
 	_onElDrag: function( e ) {//{{{
@@ -502,7 +505,7 @@ Seiho.mm.element.Window = Ext.extend( Ext.Window, {//{{{
 	//}}}
 	_onMove: function( el, x, y ) {//{{{
 		if( this.raphael_rect )
-			this.raphael_rect.attr( { x: x, y: y } );
+		this.raphael_rect.attr( { x: x, y: y } );
 	},
 	//}}}
 	_onDrag: function( el, x, y ) {//{{{
@@ -516,6 +519,7 @@ Seiho.mm.element.Window = Ext.extend( Ext.Window, {//{{{
 	//}}}
 });
 //}}}
+
 // private - custom Window DD implementation
 Seiho.mm.element.Window.DD = function( win, config ){//{{{
 	this.win = win;
@@ -526,24 +530,24 @@ Seiho.mm.element.Window.DD = function( win, config ){//{{{
 };
 
 Ext.extend( Seiho.mm.element.Window.DD, Ext.dd.DD, {
-    moveOnly:true,
-    headerOffsets:[100, 25],
-    startDrag : function(){
-        var w = this.win;
-        this.proxy = w.ghost();
-        if(w.constrain !== false){
-            var so = w.el.shadowOffset;
-            this.constrainTo(w.container, {right: so, left: so, bottom: so});
-        }else if(w.constrainHeader !== false){
-            var s = this.proxy.getSize();
-            this.constrainTo(w.container, {right: -(s.width-this.headerOffsets[0]), bottom: -(s.height-this.headerOffsets[1])});
-        }
-    },
-    b4Drag : Ext.emptyFn,
-    endDrag : function(e){
-        this.win.unghost();
-        this.win.saveState();
-    }
+	moveOnly:true,
+	headerOffsets:[100, 25],
+	startDrag : function(){
+		var w = this.win;
+		this.proxy = w.ghost();
+		if(w.constrain !== false){
+			var so = w.el.shadowOffset;
+			this.constrainTo(w.container, {right: so, left: so, bottom: so});
+		}else if(w.constrainHeader !== false){
+			var s = this.proxy.getSize();
+			this.constrainTo(w.container, {right: -(s.width-this.headerOffsets[0]), bottom: -(s.height-this.headerOffsets[1])});
+		}
+	},
+	b4Drag : Ext.emptyFn,
+	endDrag : function(e){
+		this.win.unghost();
+		this.win.saveState();
+	}
 });
 //}}}
 // vim: fdm=marker ts=4 st=4 sts=4
