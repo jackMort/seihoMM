@@ -2,10 +2,38 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class Element_Param( models.Model ):
+    name = models.CharField( max_length=100 )
+    value = models.CharField( max_length=100 )
+    type = models.IntegerField( default=0 )
+
+    def __unicode__( self ):
+        return "%s : %s" % ( self.name, self.value )
+
+    def getValue( self ):
+        return {
+            1: lambda: self.getInt(),
+            2: lambda: self.getFloat(),
+            # TODO rest of types [Date ...]
+            # default string
+            0: lambda: self.value
+        }[self.type]()
+    
+    def getInt( self ):
+        return int( self.value )
+
+    def getFloat( self ):
+        return float( self.value )
+
+
+class Element( models.Model ):
+    params = models.ManyToManyField( Element_Param )
+
 class Map( models.Model ):
     name = models.CharField( "Nazwa mapy", max_length=30 )
     description = models.TextField( "Opis mapy" )
     users = models.ManyToManyField( User, through='Users' )
+    elements = models.ManyToManyField( Element )
     private = models.BooleanField( "Prywatna" )
     date_added = models.DateTimeField( auto_now_add=True )
 
@@ -33,8 +61,8 @@ class User_Type( models.Model ):
     description = models.TextField()
     
     class Meta:
-        verbose_name = "Typ użytkownika"
-        verbose_name_plural = "Typy użytkowników"
+        verbose_name = "Typ usera"
+        verbose_name_plural = "Typy usera"
 
     def __unicode__( self ):
         return self.name
@@ -45,9 +73,5 @@ class Users( models.Model ):
     type = models.ForeignKey( User_Type )
     date_added = models.DateTimeField( auto_now_add=True )
     author = models.BooleanField()
-    
-    class Meta:
-        verbose_name = "Użytkownicy"
-        verbose_name_plural = "Użytkownicy"
 
 # vim: fdm=marker ts=4 sw=4 sts=4
