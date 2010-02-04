@@ -127,8 +127,8 @@ Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
 			default: v = u * w
 		}
 
-		var cx = 0, cy = 0, cw = v, ch = v;
-		el.set( { viewBox: cx + " " + cy + " " + cw + " " + " " + ch } )
+		var cx = [0, 0, v, v];
+		el.set( { viewBox: cx.join( ' ' ) } )
 	},
 	moveElementTo: function() {
 
