@@ -18,7 +18,7 @@ class Element_Param( models.Model ):
             # default string
             0: lambda: self.value
         }[self.type]()
-    
+
     def getInt( self ):
         return int( self.value )
 
@@ -59,7 +59,7 @@ class Map( models.Model ):
 class User_Type( models.Model ):
     name = models.CharField( "User role", max_length=30 )
     description = models.TextField()
-    
+
     class Meta:
         verbose_name = "Typ usera"
         verbose_name_plural = "Typy usera"
@@ -74,4 +74,4 @@ class Users( models.Model ):
     date_added = models.DateTimeField( auto_now_add=True )
     author = models.BooleanField()
 
-# vim: fdm=marker ts=4 sw=4 sts=4
+# vim: fdm=marker ai ts=4 sw=4 sts=4 et
