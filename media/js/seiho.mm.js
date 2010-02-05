@@ -22,16 +22,22 @@ Ext.namespace(
 );
 // ...................
 Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
-	maxWidth      : 5000,
-	maxHeight     : 5000,
+	maxWidth      : 2000,
+	maxHeight     : 2000,
 	gridSize      : 10,
 	bodyCssClass  : 'mm_canvas',
-	autoScroll    : true,
+	autoScroll    : false,
 	// mart that is canvas
 	yeahItIsCanvas: Ext.emptyFn,
 	initComponent : function() {
 		// ..
 		Ext.apply( this, {
+			bbar: [
+				'autor: <a href="#">lech.twarog@gmail.com<a/>',
+				'->', {
+					iconCls: 'icon-disconnect'
+				}, ' '				
+			],
 			keys: 
 			[
 				// intall element on CTRL+ENTER
@@ -279,13 +285,6 @@ Seiho.mm.element.BaseElement = Ext.extend( Ext.util.Observable, {//{{{
 });
 //}}}
 
-Raphael.fn.window = function( w, h, x, y, title ) {
-    return this.set(
-        this.rect( x, y, w, h, 5 ).attr({ stroke: '#99bbe8', fill: '#99bbe8', "fill-opacity": .9 }),
-        this.rect( x + 5, y + 15, w - 10, h - 20, 3 ).attr({ stroke: '#99bbe8', fill: 'white', "fill-opacity": 1 }),
-        this.text( x + 40, y + 5, title ).attr( { font: '10px Courier, Courier New, Arial', fill: '#ffffff' })
-    )
-}
 
 Seiho.mm.element.Window = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 	width        : 200,
@@ -298,20 +297,64 @@ Seiho.mm.element.Window = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 	install: function() {//{{{
         Seiho.mm.element.Window.superclass.install.apply( this, arguments )
 		// ..	
-        var w = this.width, h = this.height, x = this.x, y = this.y;
-		var r = this.raphael = this.canvas.raphael.window( w, h, x, y, this.title );
+		var w = this.width, h = this.height, x = this.x, y = this.y;
+		var c = this.canvas.raphael;
 
-        setTimeout( function() {
-            alert( 'now' );
-            r.attr( { width: 200, height: 200 } );
-        }, 5000 )
+		this.r_window_frame = c.rect( x + 4, y + 4, w, h, 5 ).attr({ stroke: '', fill: 'black', "fill-opacity": .2 })
+		this.r_window = c.rect( x, y, w, h, 5 ).attr({ stroke: '#99bbe8', fill: '#99bbe8', "fill-opacity": 1 })
+		this.r_window_body = c.rect( x + 5, y + 15, w - 10, h - 20, 3 ).attr({ stroke: '#99bbe8', fill: 'white', "fill-opacity": 1 })
+		this.r_window_header = c.text( x + 35, y + 8, this.title ).attr( { 'font-family': 'tahoma, arial, helvetica', 'font-weight': 'bold', fill: 'white' })
+
+		var t = this;
+		var isDrag = false;
+	    var dragger = function (e) {
+		    this.dx = e.clientX;
+			this.dy = e.clientY;
+	        isDrag = this;
+			e.preventDefault && e.preventDefault();
+	    };
+
+        this.r_window_header.mousedown(dragger);
+    
+		document.onmousemove = function (e) {
+			e = e || window.event;
+			if (isDrag) {
+				var cp = t.canvas.getPosition()
+				var x = e.clientX - cp[0], y = e.clientY - cp[1];
+				// ..				
+				t.r_window.attr( { x: x, y: y } );				
+				t.r_window_frame.attr( { x: x + 4, y: y + 4 } );
+				t.r_window_body.attr( { x: x + 5, y: y + 15 } );
+				t.r_window_header.attr( { x: x + 35, y: y + 8 } );
+				// ..
+			}
+		};
+		 document.onmouseup = function () {
+			isDrag = false;
+		};
+
 	},
 	//}}}
 	uninstall: function() {//{{{
         Seiho.mm.element.Window.superclass.uninstall.apply( this, arguments )
 		// ..
-        this.raphael.remove()
+		this.r_window.remove()
+		this.r_window_body.remove()
+		this.r_window_header.remove()
+	},
+	setSize: function( w, h ) {//{{{
+		this.r_window.attr( { width: w, height: h } );
+		this.r_window_frame.attr( { width: w, height: h } );
+		this.r_window_body.attr( { width: w - 10, height: h - 20 } );
+	},
+	//}}}
+	setPosition: function( x, y ) {//{{{
+		this.r_window.attr( { x: x, y: y } );
+		this.r_window_frame.attr( { x: x + 4, y: y + 4 } );
+		this.r_window_body.attr( { x: x + 5, y: y + 15 } );
+		this.r_window_header.attr( { x: x + 35, y: y + 8 } );
 	}
+	//}}}
 });
 //}}}
 
