@@ -190,7 +190,7 @@ Seiho.mm.Registry = Ext.extend( Ext.util.MixedCollection, {//{{{
 	register  : function( e ) {
 		return this.add( e );
 	},
-	unregister: function() {
+	unregister: function( e ) {
 		return this.remove( e );
 	}
 });
@@ -284,8 +284,6 @@ Seiho.mm.element.BaseElement = Ext.extend( Ext.util.Observable, {//{{{
 	//}}}
 });
 //}}}
-
-
 Seiho.mm.element.Window = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 	width        : 200,
 	height       : 100,
@@ -304,6 +302,8 @@ Seiho.mm.element.Window = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 		this.r_window = c.rect( x, y, w, h, 5 ).attr({ stroke: '#99bbe8', fill: '#99bbe8', "fill-opacity": 1 })
 		this.r_window_body = c.rect( x + 5, y + 15, w - 10, h - 20, 3 ).attr({ stroke: '#99bbe8', fill: 'white', "fill-opacity": 1 })
 		this.r_window_header = c.text( x + 35, y + 8, this.title ).attr( { 'font-family': 'tahoma, arial, helvetica', 'font-weight': 'bold', fill: 'white' })
+		this.r_window_add_button = c.circle( x + w - 22, y + 8, 4 ).attr( { stroke: '', fill: 'white' } ) 
+		this.r_window_remove_button = c.circle( x + w - 10, y + 8, 4 ).attr( { stroke: '', fill: '#eeeeee' } ) 
 
 		var t = this;
 		var isDrag = false;
@@ -320,32 +320,51 @@ Seiho.mm.element.Window = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 			e = e || window.event;
 			if (isDrag) {
 				var cp = t.canvas.getPosition()
-				var x = e.clientX - cp[0], y = e.clientY - cp[1];
+				var x = e.clientX - cp[0], y = e.clientY - cp[1], s = t.r_window.getBBox()				
 				// ..				
-				t.r_window.attr( { x: x, y: y } );				
-				t.r_window_frame.attr( { x: x + 4, y: y + 4 } );
-				t.r_window_body.attr( { x: x + 5, y: y + 15 } );
-				t.r_window_header.attr( { x: x + 35, y: y + 8 } );
+				t.r_window.attr( { x: x, y: y } )	
+				t.r_window_frame.attr( { x: x + 4, y: y + 4 } )
+				t.r_window_body.attr( { x: x + 5, y: y + 15 } )
+				t.r_window_header.attr( { x: x + 35, y: y + 8 } )
+				t.r_window_add_button.attr( { cx: x + s.width - 22, cy: y + 8 } )
+				t.r_window_remove_button.attr( { cx: x + s.width - 10, cy: y + 8 } )
 				// ..
+				this.x = x, this.y = y
+				t.fireEvent( 'resize', t, x, y )
 			}
 		};
 		 document.onmouseup = function () {
 			isDrag = false;
 		};
 
+		this.r_window_add_button.click( function(e) {
+			t.addWindow()
+		})
+	
+		this.r_window_remove_button.click( ( function(e) {
+			t.uninstall()
+		} ).createDelegate( this ) )
+		
+		return this
 	},
 	//}}}
 	uninstall: function() {//{{{
         Seiho.mm.element.Window.superclass.uninstall.apply( this, arguments )
 		// ..
 		this.r_window.remove()
+		this.r_window_frame.remove()
 		this.r_window_body.remove()
 		this.r_window_header.remove()
+		this.r_window_add_button.remove()
+		this.r_window_remove_button.remove()
 	},
+	//}}}
 	setSize: function( w, h ) {//{{{
 		this.r_window.attr( { width: w, height: h } );
 		this.r_window_frame.attr( { width: w, height: h } );
 		this.r_window_body.attr( { width: w - 10, height: h - 20 } );
+		this.r_window_add_button.attr( { cx: x + s.width - 22, cy: y + 8 } )
+		this.r_window_remove_button.attr( { cx: x + s.width - 10, cy: y + 8 } )
 	},
 	//}}}
 	setPosition: function( x, y ) {//{{{
@@ -353,9 +372,139 @@ Seiho.mm.element.Window = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 		this.r_window_frame.attr( { x: x + 4, y: y + 4 } );
 		this.r_window_body.attr( { x: x + 5, y: y + 15 } );
 		this.r_window_header.attr( { x: x + 35, y: y + 8 } );
-	}
+	},
 	//}}}
+	getConnect: function() {
+		return this.r_window
+	},
+	addWindow: function() {
+		var tp = this.canvas.getToolsProvider();
+		var w = tp.installWindow();
+		tp.getLine( this.canvas ).connectTo( this, w );
+	},
+	serialize: function() {//{{{
+		return {
+			title: this.title,
+			x: x,
+			y: y
+		};
+	}
 });
+//}}}
+Seiho.mm.element.Line   = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
+	// first point
+	x1     : 10,
+	y1     : 10,
+	// second point
+	x2     : 100,
+	y2     : 100,
+	// radius 1
+	z1     : 20,
+	z2     : 20,
+	// radius 2
+	z3     : 110,
+	z4     : 110,
+	install: function() {//{{{
+		this.initLine( this.x1, this.y1, this.z1, this.z2, this.z3, this.z4, this.x2, this.y2 );
+		Seiho.mm.element.Line.superclass.install.apply( this, arguments );
+		// ..
+		return this
+	},
+	//}}}
+	connectTo: function( f, t ) {//{{{
+		var r  = this.canvas.raphael;
+		var rr = r.connection( f.getConnect(), t.getConnect(), "#99bbe8", "#99bbe8|2" ) 
+		// register connection
+		var fac = f.connections || new Ext.util.MixedCollection();
+		fac.add( t );
+		f.connections = fac;
+		// ..
+		var el = Ext.get( rr.bg.node );
+
+		var contextMenu = function( e ) {
+			Seiho.Logger.log( e.getXY() );
+		}
+		var update = function( w, x, y) {
+			r.connection( rr );
+		}
+		var destroy = function() {
+			rr.line.remove();
+			rr.bg.remove();
+			// unregister connections
+			f.connections.remove( t );
+		}
+		// ..
+		el.on( 'contextmenu', contextMenu )		
+		// ..
+		f.on( 'move', update )    ;t.on( 'move', update );
+		f.on( 'drag', update )    ;t.on( 'drag', update );
+		f.on( 'resize', update )  ;t.on( 'resize', update );
+		f.on( 'remove', destroy ) ;t.on( 'remove', destroy );
+		// ..
+	},
+
+	initLine : function(x, y, ax, ay, bx, by, zx, zy) {
+		var r = this.canvas.raphael;
+		var path = [["M", x, y], ["C", ax, ay, bx, by, zx, zy]],
+		path2 = [["M", x, y], ["L", ax, ay], ["M", bx, by], ["L", zx, zy]],
+		curve = r.path(path).attr({stroke: Raphael.getColor(), "stroke-width": 2}),
+		controls = r.set(
+			r.path(path2).attr({stroke: "#999", "stroke-opacity": .3}),
+			r.circle(x, y, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6}),
+			r.circle(ax, ay, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6}),
+			r.circle(bx, by, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6}),
+			r.circle(zx, zy, 3).attr({fill: "#999", "stroke-opacity": 0, "stroke-width": 6})
+		);
+		controls[1].update = function (x, y) {
+			var X = this.attr("cx") + x,
+				Y = this.attr("cy") + y;
+			this.attr({cx: X, cy: Y});
+			path[0][1] = X;
+			path[0][2] = Y;
+			path2[0][1] = X;
+			path2[0][2] = Y;
+			controls[2].update(x, y);
+		};
+		controls[2].update = function (x, y) {
+			var X = this.attr("cx") + x,
+				Y = this.attr("cy") + y;
+			this.attr({cx: X, cy: Y});
+			path[1][1] = X;
+			path[1][2] = Y;
+			path2[1][1] = X;
+			path2[1][2] = Y;
+			curve.attr({path: path});
+			controls[0].attr({path: path2});
+		};
+		controls[3].update = function (x, y) {
+			var X = this.attr("cx") + x,
+				Y = this.attr("cy") + y;
+			this.attr({cx: X, cy: Y});
+			path[1][3] = X;
+			path[1][4] = Y;
+			path2[2][1] = X;
+			path2[2][2] = Y;
+			curve.attr({path: path});
+			controls[0].attr({path: path2});
+		};
+		controls[4].update = function (x, y) {
+			var X = this.attr("cx") + x,
+				Y = this.attr("cy") + y;
+			this.attr({cx: X, cy: Y});
+			path[1][5] = X;
+			path[1][6] = Y;
+			path2[3][1] = X;
+			path2[3][2] = Y;
+			controls[3].update(x, y);
+		};
+		controls.mousedown(function (e) {
+		//                      drag = this;
+		//                        E.x = e.clientX;
+		//                    E.y = e.clientY;
+		});
+	}
+	//}}} 
+})
 //}}}
 
 
