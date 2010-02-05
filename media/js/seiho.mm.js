@@ -278,7 +278,7 @@ Seiho.mm.element.BaseElement = Ext.extend( Ext.util.Observable, {//{{{
 	//}}}
 	serialize: function() {//{{{
 		return {
-			title: this.title						
+			class: this.class						
 		};
 	}
 	//}}}
@@ -291,6 +291,7 @@ Seiho.mm.element.Window = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 	y            : 100,
 	iconCls      : 'icon-page_white',
 	title        : 'Bez tytułu',
+	class        : 'window',
 	// .....
 	install: function() {//{{{
         Seiho.mm.element.Window.superclass.install.apply( this, arguments )
@@ -383,11 +384,13 @@ Seiho.mm.element.Window = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 		tp.getLine( this.canvas ).connectTo( this, w );
 	},
 	serialize: function() {//{{{
-		return {
+		var r = Seiho.mm.element.Window.superclass.serialize.apply( this, arguments )
+		Ext.apply( r, { 
 			title: this.title,
-			x: x,
-			y: y
-		};
+			x: this.x,
+			y: this.y
+		});
+		return r
 	}
 });
 //}}}

@@ -319,10 +319,10 @@ Seiho.mm.application.App = function() {//{{{
 			var t = tabPanel.getActiveTab();
 			// TODO create isCanvas
 			if( t.yeahItIsCanvas ) {
-				//var r = t.serialize();
-				// TODO serializers
-				//Seiho.Logger.log( r );
-				window.open( '/map/export/' + Ext.util.base64.encode( t.getSvgInnerHTML() ) )
+				var r = t.serialize();
+				Ext.Ajax.request({
+					url: '/map/save/' + Ext.util.JSON.encode( r )
+				})
 			}
 		},
 		close  : function() {

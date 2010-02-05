@@ -10,7 +10,10 @@ urlpatterns = patterns('',
     url(r'^/?$', 'django.views.generic.simple.direct_to_template', { 'template' : 'index.html' }, name='index' ),
     url(r'^welcome.html$', 'django.views.generic.simple.direct_to_template', { 'template' : 'welcome.html' }),
     url(r'^aboutUs.html$', 'django.views.generic.simple.direct_to_template', { 'template' : 'aboutUs.html' }),
+ 
     url(r'^map/export/(?P<svg>.*)$', 'map.views.export_svg' ),
+    url(r'^map/save/(?P<json>.*)$', 'map.views.save_json' ),
+    url(r'^map/load/(?P<id>\w+)$', 'map.views.load_map' ),
 
     url(r'^admin/', include(admin.site.urls))
 )
