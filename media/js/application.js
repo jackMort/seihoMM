@@ -245,14 +245,22 @@ Seiho.mm.application.App = function() {//{{{
                                                                 }
                                                             ]
                                                     },
-													{ text: 'Ustawienia', iconCls: 'icon-page_white_gear' }
+													{ text: 'Ustawienia', iconCls: 'icon-page_white_gear', handler: function() {
+														var wnd = new Ext.Window({
+															width: 280,
+															height: 400,
+															layout: 'fit',
+															items: new Seiho.mm.tools.Toolbox()
+														})
+														wnd.show()	
+													}}
 												]
 										},{
 											text     : 'Widok',
 											iconCls  : 'icon-page_white',
 											menu     : 
 												[
-													{ text: 'Nowy ...'}
+													{ text: 'Nowy ...' }
 												]
 										},{
 											text     : 'Pomoc',
