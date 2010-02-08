@@ -20,6 +20,32 @@ Ext.namespace(
 	'Seiho.mm',
 	'Seiho.mm.element' 
 );
+
+// -------------------
+Ext.override(Ext.Element, {
+// Call the passed function on the current Element, and all its descendants
+    cascade: function(fn, scope, args) {
+        if(fn.apply(scope || this, args || [this]) !== false){
+            var cs = this.dom.childNodes;
+            for(var i = 0, len = cs.length; i < len; i++) {
+                if (cs[i].nodeType!=3) {
+                    // Don't take care of "\n " textnode
+                    cs[i].removeAttribute('id');
+                    Ext.get(cs[i]).cascade(fn, scope, args);
+                }
+            }
+        }
+    },
+    
+    clone: function() {        
+        var result = this.dom.cloneNode(true);
+        result.id = Ext.id();
+        result = Ext.get(result);
+        result=result.clean(); // buggy ?? #textNode are not removed ...
+        result.cascade(function(e){e.id = Ext.id();});
+        return result;
+    }
+});
 // ...................
 Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
 	maxWidth      : 2000,
@@ -32,12 +58,6 @@ Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
 	initComponent : function() {
 		// ..
 		Ext.apply( this, {
-			bbar: [
-				'autor: <a href="#">lech.twarog@gmail.com<a/>',
-				'->', {
-					iconCls: 'icon-disconnect'
-				}, ' '				
-			],
 			keys: 
 			[
 				// intall element on CTRL+ENTER
@@ -99,13 +119,16 @@ Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
 	},
 	afterRender  : function() {
 		Seiho.mm.Canvas.superclass.afterRender.call( this );
-		//..
+        //..
+        var self = this;
 		this.DropTarget = new Ext.dd.DropTarget( this.body, {
 			ddGroup   : 'canvas',
 			scope     : this,
 			cb        : this.notifyDrop,
-			notifyDrop: function( src, e, data ) {
-				return this.cb.call( this.scope, src, e, data );
+            notifyDrop: function( src, e, data ) {
+                //return this.cb.call( this.scope, src, e, data );
+                new data.node.type( self, { x: e.getPageX(), y: e.getPageY() } ).install();
+                return true;
 			}
 		});
 
@@ -251,7 +274,9 @@ Seiho.mm.Editor = Ext.extend( Ext.util.Observable, {//{{{
 
 // PROTOTYPES
 Seiho.mm.element.BaseElement = Ext.extend( Ext.util.Observable, {//{{{
+    category: 'Podstawowe',
 	constructor: function( canvas, config ){//{{{
+        if( !canvas || canvas == undefined ) throw "canvas must by defined ..."
 		this.canvas = canvas;
         this.id = Ext.id();
 		this.addEvents(
@@ -347,6 +372,9 @@ Seiho.mm.element.DD = Ext.extend( Ext.dd.DD, {
 });
 
 Seiho.mm.element.Image = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
+    text: 'Obrazek',
+    iconCls: 'icon-page_white_code',
+    // ..
     src: '/media/images/hal.png',
     width: 128,
     height: 128,
@@ -389,11 +417,13 @@ Seiho.mm.element.Image = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
 });
 //}}}
 Seiho.mm.element.Window = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
-	width        : 200,
+	text: 'Okno standardowe',
+    iconCls: 'icon-page_white_code_red',
+    // ..
+    width        : 200,
 	height       : 100,
 	x            : 100,
 	y            : 100,
-	iconCls      : 'icon-page_white',
 	title        : 'Bez tytułu',
 	class        : 'window',
 	// .....
@@ -896,4 +926,8 @@ Ext.extend( Seiho.mm.element.Window.DD, Ext.dd.DD, {
 });
 //}}}
 */
+
+Seiho.mm.tools.Registry.register( Seiho.mm.element.Image )
+Seiho.mm.tools.Registry.register( Seiho.mm.element.Window )
+
 // vim: fdm=marker ts=4 st=4 sts=4

@@ -28,9 +28,8 @@ Seiho.mm.tools.Toolbox = Ext.extend( Ext.tree.TreePanel, { //{{{
 	region: "west",
 	split: true,
 	layout: "fit",
-	collapsible: true,
 	rootVisible: false,
-	animate: false,
+	animate: true,
 	autoScroll: true,
 	useArrows: true,
 	minWidth: 150,
@@ -38,6 +37,7 @@ Seiho.mm.tools.Toolbox = Ext.extend( Ext.tree.TreePanel, { //{{{
 	collapseFirst: false,
 	animCollapse: false,
 	animFloat: false,
+    ddGroup: 'canvas',
 	initComponent: function () {
 		this.loader = new Seiho.mm.tools.Toolbox.Loader();
 		this.root = {
@@ -56,7 +56,7 @@ Seiho.mm.tools.Toolbox = Ext.extend( Ext.tree.TreePanel, { //{{{
 
 		var hiddenPkgs = [];
 
-		function filterTree(e) {
+		this.filterTree = function filterTree(e) {
 			var text = e.target.value;
 			Ext.each(hiddenPkgs, function (n) {
 				n.ui.show();
@@ -74,7 +74,7 @@ Seiho.mm.tools.Toolbox = Ext.extend( Ext.tree.TreePanel, { //{{{
 			});
 		}
 		Ext.apply(this, {
-			tbar: new Ext.Toolbar({
+			/*tbar: new Ext.Toolbar({
 				cls: 'top-toolbar',
 				items: [' ', new Ext.form.TextField({
 					width: 200,
@@ -105,6 +105,7 @@ Seiho.mm.tools.Toolbox = Ext.extend( Ext.tree.TreePanel, { //{{{
 					scope: this
 				}]
 			})
+            */
 		});
 
 		Seiho.mm.tools.Toolbox.superclass.initComponent.call(this);
@@ -150,7 +151,7 @@ Seiho.mm.tools.Toolbox.Loader = Ext.extend( Ext.tree.TreeLoader, { //{{{
 			});
 			g.appendChild(h);
 			h.type = f;
-			h.instance = new f()
+			//h.instance = new f()
 		}
 		//       l.loadUserTypes();
 		a.endUpdate();

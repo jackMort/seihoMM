@@ -157,7 +157,7 @@ Seiho.mm.application.HomePanel = Ext.extend( Ext.Panel, {//{{{
 Seiho.mm.application.App = function() {//{{{
 	var toolsProvider = new Seiho.mm.application.ToolsProvider(); 	
 	var tabPanel      = new Seiho.mm.application.TabPanel({
-		tbar: toolsProvider
+		//tbar: toolsProvider
 	});
 	var keyMap        = new Ext.KeyMap( document, [
 		// intall element on CTRL+ENTER
@@ -245,15 +245,7 @@ Seiho.mm.application.App = function() {//{{{
                                                                 }
                                                             ]
                                                     },
-													{ text: 'Ustawienia', iconCls: 'icon-page_white_gear', handler: function() {
-														var wnd = new Ext.Window({
-															width: 280,
-															height: 400,
-															layout: 'fit',
-															items: new Seiho.mm.tools.Toolbox()
-														})
-														wnd.show()	
-													}}
+													{ text: 'Ustawienia', iconCls: 'icon-page_white_gear' }
 												]
 										},{
 											text     : 'Widok',
@@ -303,18 +295,131 @@ Seiho.mm.application.App = function() {//{{{
 				new Seiho.mm.element.Window( t ).show();
 			}
 		},
-		newCanvas    : function() {
-			var t = new Seiho.mm.Canvas(
+        newCanvas    : function() {
+            var m = new Ext.Panel({
+                height: 200,
+                layout: 'fit',
+                border: false,
+                region: 'south',
+                title: 'Podgląd',
+                iconCls: 'icon-magnifier'
+            })
+            var b = new Seiho.mm.tools.Toolbox({
+                region: 'center',
+                title: 'Narzędzia',
+                iconCls: 'icon-application_osx_terminal'
+            })
+			var c = new Seiho.mm.Canvas(
 				{
 					toolsProvider: toolsProvider,
 					// ...
-					title   : 'Nowa Mapa ...',
-					iconCls : 'icon-page_white',
-					closable: true,
-					// plugins ...
-					// plugins : [  ]
+                    region: 'center',
+                    border: false
 				}
-			);
+            );
+            setTimeout(function() {
+                var el = Ext.get( c.body ).dom.innerHTML
+                console.log( el )
+                var items = m.items || new Ext.util.MixedCollection();
+                items.each( function( c ) {
+                    var item = c.getEl();
+                    m.remove( c, true )
+                    if( item ) {
+                        item.remove()
+                    }
+                })
+                m.add( new Ext.Panel({
+                    border: false,
+                    html: '<div class="canvas-min">' + el + '</div>'
+                }))
+                m.doLayout();
+            }, 20000 )
+            var t = new Ext.Panel({
+    	    	title: 'Nowa Mapa ...',
+				iconCls: 'icon-page_white',
+				closable: true,
+                layout: 'border',
+                bbar: [
+				    'autor: <a href="#">lech.twarog@gmail.com<a/>',
+				    '->', {
+					    iconCls: 'icon-disconnect'
+				    }, ' '				
+			    ],
+                tbar: [
+				' ',
+				{
+					xtype    : 'textfield',
+					width    : 250,
+					emptyText: 'Wyszukaj element ...',
+                    listeners: {
+						render: {
+							fn: function (f) {
+								f.el.on('keydown', b.filterTree, f, {
+									buffer: 350
+								});
+							},
+							scope: this
+						}
+					}
+				}, ' ', ' ', {
+					iconCls: 'icon-expand-all',
+					tooltip: 'Rozwi\u0144 wszystkie',
+					handler: function () {
+						b.root.expand(true);
+					},
+					scope: this
+				}, '-', {
+					iconCls: 'icon-collapse-all',
+					tooltip: 'Zwi\u0144 wszystkie',
+					handler: function () {
+						b.root.collapse(true);
+					},
+					scope: this
+				},
+				'->',{
+					iconCls: 'icon-application_get',
+	//				handler: this.installWindow,
+					scope  : this
+				}, ' ', {
+					iconCls: 'icon-application_lightning',
+	//				handler: this.installLine,
+					scope  : this
+				},'-', {
+					iconCls    : 'icon-tag_green',
+					toggleGroup: 'colors'
+				},{
+					iconCls: 'icon-tag_blue',
+					toggleGroup: 'colors'
+				},{
+					iconCls: 'icon-tag_purple',
+					toggleGroup: 'colors'
+				},{
+					iconCls: 'icon-tag_orange',
+					toggleGroup: 'colors'
+				},{
+					iconCls: 'icon-tag_pink',
+					toggleGroup: 'colors'
+				},{
+					iconCls: 'icon-tag_red',
+					toggleGroup: 'colors'
+				},{
+					iconCls: 'icon-tag_yellow',
+					toggleGroup: 'colors'
+				},
+				' '
+	    		],
+                items: [c, {
+                    width: 210,
+                    collapsible: false,
+                    region: 'east',
+                    margins: '1 1 1 1',
+                    cmargins: '1 1 1 1',
+                    split: false,
+                    border: true,
+                    layout: 'border',
+                    items: [b, m]
+                }]
+            });
 			tabPanel.add( t );
 			tabPanel.setActiveTab( t );
 			tabPanel.editTitle( t );
@@ -382,4 +487,4 @@ Seiho.mm.application.App = function() {//{{{
 //}}}
 
 Ext.onReady( Seiho.mm.application.App.init, Seiho.mm.application.App )
-// vim: fdm=marker ts=4 sw=4 sts=4
+// vim: fdm=marker ai ts=4 sw=4 sts=4 et
