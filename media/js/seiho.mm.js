@@ -253,6 +253,7 @@ Seiho.mm.Editor = Ext.extend( Ext.util.Observable, {//{{{
 Seiho.mm.element.BaseElement = Ext.extend( Ext.util.Observable, {//{{{
 	constructor: function( canvas, config ){//{{{
 		this.canvas = canvas;
+        this.id = Ext.id();
 		this.addEvents(
 			'add',
 			'remove',
@@ -282,6 +283,109 @@ Seiho.mm.element.BaseElement = Ext.extend( Ext.util.Observable, {//{{{
 		};
 	}
 	//}}}
+});
+//}}}
+
+Seiho.mm.element.DD = Ext.extend( Ext.dd.DD, {
+    handleMouseDown: function(e, oDD){
+        if (this.primaryButtonOnly && e.button != 0) {
+            return;
+        }
+
+        if (this.isLocked()) {
+            return;
+        }
+
+        this.DDM.refreshCache(this.groups);
+
+        var pt = new Ext.lib.Point(Ext.lib.Event.getPageX(e), Ext.lib.Event.getPageY(e));
+        /*
+        if (!this.hasOuterHandles && !this.DDM.isOverTarget(pt, this) )  {
+            alert( 'dupa :' +!this.DDM.isOverTarget(pt, this) );
+        } else {
+        */
+            if (this.clickValidator(e)) {
+
+                // set the initial element position
+                this.setStartPosition();
+
+
+                this.b4MouseDown(e);
+                this.onMouseDown(e);
+
+                this.DDM.handleMouseDown(e, this);
+
+                this.DDM.stopEvent(e);
+            } else {
+
+
+            }
+        //}
+    }, 
+    /*
+    startDrag: function(x, y) {
+        
+    },
+
+    onDrag: function(e) {
+    },
+
+    onDragEnter: function(e, id) {
+    },
+
+    onDragOver: function(e, id) {
+    },
+
+    onDragOut: function(e, id) {
+    },
+
+    onDragDrop: function(e, id) {
+    },
+
+    endDrag: function(e) {
+    }*/
+});
+
+Seiho.mm.element.Image = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
+    src: '/media/images/hal.png',
+    width: 128,
+    height: 128,
+    x: 200,
+    y: 200,
+    install: function() {
+        Seiho.mm.element.Window.superclass.install.apply( this, arguments )
+        // ..	
+		var c = this.canvas.raphael, id = this.id + '_svg';
+		
+        var r = this.r_image = c.image( this.src, this.x, this.y, this.width, this.height );
+        var el = Ext.get( this.r_image.node );
+        el.set({ id: id });
+        
+        var dd = new Seiho.mm.element.DD( id, 'group' )
+        Ext.apply( dd, {
+            onDrag: function( e ) {
+                var iPageX = e.getPageX(), iPageY = e.getPageY();
+                var oCoord = this.getTargetCoord(iPageX, iPageY);
+                if (this.deltaSetXY) {
+                    r.attr({ x: oCoord.x + this.deltaSetXY[0], y: oCoord.y + this.deltaSetXY[1] }) ;
+                }
+            },
+            startDrag: function() {
+                r.toFront();           
+            }
+        });
+        
+        /*
+        Ext.get( id ).initDDProxy("proxytest", {dragElId: id + '_proxy' }, {
+            afterDrag: function() {
+                var element = Ext.get( this.getEl() );
+                r.attr({ x : element.getLeft( true ) });
+                r.attr({ y : element.getTop( true ) });
+            }
+        });
+        */
+        return this
+	}
 });
 //}}}
 Seiho.mm.element.Window = Ext.extend( Seiho.mm.element.BaseElement, {//{{{

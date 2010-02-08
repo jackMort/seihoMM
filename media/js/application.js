@@ -95,7 +95,7 @@ Seiho.mm.application.ToolsProvider = Ext.extend( Ext.Toolbar, {//{{{
 	},
 	getLine : function( c ) {//{{{
 		// TODO return last active line component
-		return new Seiho.mm.element.Line( c );
+		return new Seiho.mm.element.Image( c );
 	}
 	//}}}
 });
