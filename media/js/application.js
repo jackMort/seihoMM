@@ -297,7 +297,7 @@ Seiho.mm.application.App = function() {//{{{
 		},
         newCanvas    : function() {
             var m = new Ext.Panel({
-                height: 200,
+                height: 150,
                 layout: 'fit',
                 border: false,
                 region: 'south',
@@ -317,9 +317,11 @@ Seiho.mm.application.App = function() {//{{{
                     border: false
 				}
             );
-            setTimeout(function() {
-                var el = Ext.get( c.body ).dom.innerHTML
-                console.log( el )
+            setInterval(function() {
+                var el = Ext.get( c.body ).clone().removeClass( 'mm_canvas' );
+                var svg = Ext.get( el.dom.firstElementChild )
+        		var cx = [0, 0, 10000, 10000];
+		        svg.set( { viewBox: cx.join( ' ' ) } )
                 var items = m.items || new Ext.util.MixedCollection();
                 items.each( function( c ) {
                     var item = c.getEl();
@@ -330,10 +332,11 @@ Seiho.mm.application.App = function() {//{{{
                 })
                 m.add( new Ext.Panel({
                     border: false,
-                    html: '<div class="canvas-min">' + el + '</div>'
+                    //html: '<div class="canvas-min">' + el + '</div>'
+                    contentEl: el
                 }))
                 m.doLayout();
-            }, 20000 )
+            }, 2000 )
             var t = new Ext.Panel({
     	    	title: 'Nowa Mapa ...',
 				iconCls: 'icon-page_white',
