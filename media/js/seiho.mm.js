@@ -112,6 +112,11 @@ Seiho.mm.Canvas = Ext.extend( Ext.Panel, {//{{{
 
 		// init registry
 		this.registry = new Seiho.mm.Registry();
+		// init history
+		this.historyManager = new Seiho.mm.history.Manager();
+		this.historyManager.on( 'change', function( h) {
+			Seiho.Logger.log( h.all() )	
+		})
 
 		// TODO check
 		//map = new Ext.KeyMap( document, this.keys_ );
@@ -274,7 +279,9 @@ Seiho.mm.Editor = Ext.extend( Ext.util.Observable, {//{{{
 
 // PROTOTYPES
 Seiho.mm.element.BaseElement = Ext.extend( Ext.util.Observable, {//{{{
-    category: 'Podstawowe',
+	class: 'baseElement',
+	category: 'Podstawowe',
+	myConfig: [ 'category' ],	
 	constructor: function( canvas, config ){//{{{
         if( !canvas || canvas == undefined ) throw "canvas must by defined ..."
 		this.canvas = canvas;
@@ -285,27 +292,44 @@ Seiho.mm.element.BaseElement = Ext.extend( Ext.util.Observable, {//{{{
 			'move',
 			'resize'
 		);
-
+		
 		Ext.apply( this, config || {} );
 		Seiho.mm.element.BaseElement.superclass.constructor.call( config )
 	},
 	//}}}
-	install: function() {//{{{
+	install: function( noHistory ) {//{{{
 		this.canvas.registerElement( this );
 		// ..
+		// ..
+		if( !noHistory ) {
+			this.canvas.historyManager.put( this.getInstallAction() );		
+		}	
 		this.fireEvent( 'add', this, this.canvas );		
 	},
 	//}}}
-	uninstall: function() {//{{{
+	uninstall: function( noHistory ) {//{{{
 		this.canvas.unregisterElement( this );
 		// ..
+		if( !noHistory ) {
+			this.canvas.historyManager.put( this.getUninstallAction() );		
+		}
 		this.fireEvent( 'remove', this, this.canvas );
 	},
 	//}}}
 	serialize: function() {//{{{
-		return {
-			class: this.class						
-		};
+		var tmp = {};
+		for( var i in this.myConfig ) {
+			tmp[i] = this[i]
+		}
+		return tmp;
+	},
+	//}}}
+	getInstallAction: function() {//{{{
+		return new Seiho.mm.history.Action( { name: 'Usunięcie elementu ' + this.text } )
+	},
+	//}}}
+	getUninstallAction: function() {//{{{
+		return new Seiho.mm.history.Action( { name: 'Usunięcie elementu ' + this.text } )
 	}
 	//}}}
 });
@@ -379,7 +403,8 @@ Seiho.mm.element.Image = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
     width: 128,
     height: 128,
     x: 200,
-    y: 200,
+	y: 200,
+	myConfig: [ 'category', 'text', 'src', 'width', 'height', 'x', 'y' ],
     install: function() {
         Seiho.mm.element.Window.superclass.install.apply( this, arguments )
         // ..	
@@ -413,6 +438,27 @@ Seiho.mm.element.Image = Ext.extend( Seiho.mm.element.BaseElement, {//{{{
         });
         */
         return this
+	},
+	uninstall: function() {
+		Seiho.mm.element.Image.superclass.uninstall.apply( this, arguments )
+		// ..
+		this.r_image.remove()
+	},
+	getInstallAction: function() {
+		var self = this;
+		return new Seiho.mm.history.Action({
+			name: 'Instalacja Obrazka',
+			redo: function(){ new Seiho.mm.element.Image( self.canvas, self.serialize() ).install( true ) },
+			undo: function(){ self.uninstall( true ) }
+		})
+	},
+	getUninstallAction: function() {
+		var self = this;
+		return new Seiho.mm.history.Action({
+			name: 'Deinstalacja Obrazka',
+			redo: function(){ self.uninstall( true ) },
+			undo: function(){ new Seiho.mm.element.Image( self.canvas, self.serialize() ).install( true ) }
+		})
 	}
 });
 //}}}

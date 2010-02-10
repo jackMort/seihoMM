@@ -309,6 +309,18 @@ Seiho.mm.application.App = function() {//{{{
                 title: 'Narzędzia',
                 iconCls: 'icon-application_osx_terminal'
             })
+ 
+            var undoAction = new Ext.Action({
+                disabled: true,
+                iconCls: 'icon-arrow_undo',
+                handler: function() { c.historyManager.undo() }
+            })
+            var redoAction = new Ext.Action({ 
+                disabled: true,
+                iconCls: 'icon-arrow_redo', 
+                handler: function() { c.historyManager.redo() }
+            })
+
 			var c = new Seiho.mm.Canvas(
 				{
 					toolsProvider: toolsProvider,
@@ -317,6 +329,10 @@ Seiho.mm.application.App = function() {//{{{
                     border: false
 				}
             );
+            c.historyManager.on( 'change', function( h ) {
+                undoAction.setDisabled( !h.canUndo() )   
+                redoAction.setDisabled( !h.canRedo() )   
+            })
             setInterval(function() {
                 var el = Ext.get( c.body ).clone().removeClass( 'mm_canvas' );
                 var svg = Ext.get( el.dom.firstElementChild )
@@ -379,7 +395,11 @@ Seiho.mm.application.App = function() {//{{{
 					},
 					scope: this
 				},
-				'->',{
+                '->',
+                undoAction,
+                redoAction,
+                '-',
+                {
 					iconCls: 'icon-application_get',
 	//				handler: this.installWindow,
 					scope  : this

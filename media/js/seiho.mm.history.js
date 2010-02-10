@@ -25,7 +25,11 @@ Seiho.mm.history.Manager = Ext.extend( Ext.util.Observable, {//{{{
 	constructor: function( config ) {//{{{
 		this.undoActions = []
 		this.redoActions = []
-		// ..
+        // ..
+        this.addEvents(
+            'change'    
+        )
+
 		Ext.apply( this, config || {} );
 		Seiho.mm.history.Manager.superclass.constructor.call( config )
 	},
@@ -46,6 +50,7 @@ Seiho.mm.history.Manager = Ext.extend( Ext.util.Observable, {//{{{
 		action.undo();
 		this.undoActions.splice( lastIdx, 1 );
 		this.redoActions.push( action );
+        this.fireEvent( 'change', this )
 	},
 	//}}}
 	redo: function() {//{{{
@@ -56,18 +61,22 @@ Seiho.mm.history.Manager = Ext.extend( Ext.util.Observable, {//{{{
 		action.redo();
 		this.redoActions.splice( lastIdx, 1 );
 		this.undoActions.push( action );
+        this.fireEvent( 'change', this )
 	},
 	//}}}
-	put: function( action ) {
+	put: function( action ) {//{{{
 		this.redoActions = [];
-		this.undoActions.push( action )
-	},
-	all: function() {
+        this.undoActions.push( action )
+        this.fireEvent( 'change', this )
+    },
+    //}}}
+	all: function() {//{{{
 		return {
 			undo: this.undoActions,
 			redo: this.redoActions
 		}
-	}
+    }
+    //}}}
 });
 //}}}
 Seiho.mm.history.Action = Ext.extend( Ext.util.Observable, {//{{{
@@ -80,7 +89,7 @@ Seiho.mm.history.Action = Ext.extend( Ext.util.Observable, {//{{{
 	redo: function() {//{{{
 		Seiho.Logger.log( 'redo' )
 	},
-	//}}
+	//}}}
 	undo: function() {//{{{
 		Seiho.Logger.log( 'undo' )
 	}
